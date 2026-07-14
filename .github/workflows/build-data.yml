@@ -1,0 +1,39 @@
+name: Update dashboard data
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/*.xlsx'
+      - '*.xlsx'
+      - 'scripts/convert.js'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Installeer dependencies
+        run: npm install
+
+      - name: Zet Excel om naar data.json
+        run: npm run convert
+
+      - name: Commit bijgewerkte data.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/data.json
+          git diff --staged --quiet || git commit -m "Automatische update van dashboarddata"
+          git push
