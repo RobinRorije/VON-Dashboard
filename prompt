@@ -1,0 +1,214 @@
+Gebruik het bijgevoegde Excel-bestand als referentie voor structuur, kolommen, tabbladen en datakwaliteit.
+
+Maak een NIEUW Excel-bestand met alle Nederlandse nieuwbouwwoningen op Funda die:
+- in de afgelopen 10 dagen nieuw geplaatst zijn
+- gewijzigd zijn
+- of van status veranderd zijn
+
+BELANGRIJK:
+De output moet exact dezelfde detailgraad en kolomstructuur hebben als het bestaande Excel-bestand.
+
+Maak dus PER GEMEENTE een volledig overzicht met alle individuele woningen/projecten, net zoals in het referentiebestand.
+
+Gebruik exact deze kolommen in het tabblad “Alle woningen”:
+
+- Funda ID
+- Funda URL
+- Projectnaam
+- Adres
+- Bouwnummer
+- Postcode
+- Plaats
+- Gemeente
+- Provincie
+- Regio
+- Status
+- Datum plaatsing
+- Looptijd (dagen)
+- Vraagprijs (€)
+- Kostenlabel
+- GBO (m²)
+- VON-prijs per m² (€)
+- Perceeloppervlakte (m²)
+- Energielabel
+- Aantal kamers
+- Aantal slaapkamers
+- Woningcategorie
+- Woningtype
+- Appartement categorie
+- Parkeerplaats
+- Type parkeerplaats
+- Bouwjaar
+- Prijs op aanvraag
+- Outlier flag
+- GemeenteOK
+
+STATUSSEN:
+Gebruik uitsluitend:
+- Te koop
+- Verkocht
+- V.O.V.
+
+WONINGTYPELOGICA
+
+Voor grondgebonden woningen:
+Gebruik ALLE woningtypen die Funda gebruikt, waaronder minimaal:
+- Vrijstaande woning
+- 2-onder-1-kapwoning
+- Hoekwoning
+- Tussenwoning
+- Eindwoning
+- Geschakelde woning
+- Herenhuis
+- Bungalow
+- Eengezinswoning
+- Woonhuis
+- Overig grondgebonden
+
+Voor appartementen:
+Maak verplicht deze categorieën:
+- Appartement <50 m²
+- Appartement 50-75 m²
+- Appartement 75-100 m²
+- Appartement >100 m²
+
+Gebruik deze categorieën consequent in:
+- alle analyses
+- alle samenvattingen
+- alle gemeentebladen
+
+PARKEREN
+Neem expliciet op:
+- Parkeerplaats: Ja / Nee / Onbekend
+- Type parkeerplaats:
+  - eigen parkeerplaats
+  - garage
+  - parkeerplaats in garage
+  - carport
+  - openbare parkeerplaats
+  - parkeerterrein
+  - onbekend
+
+LOOPTIJD
+Bereken of schat de looptijd op basis van:
+- datum plaatsing
+- huidige datum
+- of historische Funda-informatie
+
+Als niet betrouwbaar beschikbaar:
+vul “Onbekend” in.
+
+TABBLADEN
+
+Maak minimaal deze tabbladen:
+
+1. Alle woningen
+Volledige database van alle woningen van de afgelopen 10 dagen.
+
+2. Samenvatting Nederland
+Met:
+- aantal woningen
+- gemiddelde VON-prijs
+- mediaan VON-prijs
+- gemiddelde prijs per m²
+- gemiddelde GBO
+- verdeling per status
+- verdeling per woningtype
+- verdeling per appartementcategorie
+
+3. Samenvatting per provincie
+
+4. Samenvatting per regio
+
+5. Samenvatting per gemeente
+
+6. Gemeente x woningtype
+
+7. Gemeente x appartementcategorie
+
+8. Status analyse
+
+9. Looptijd analyse
+
+10. Parkeren analyse
+
+11. Controleblad
+
+12. Dataverantwoording
+
+PER GEMEENTE
+Maak daarnaast voor ELKE gemeente een apart tabblad.
+
+In elk gemeenteblad:
+- alle individuele woningen
+- alle projecten
+- alle bronlinks
+- alle woningtypen
+- alle appartementcategorieën
+- status per woning
+- prijsinformatie
+- GBO
+- energielabel
+- parkeerinformatie
+
+SAMENVATTINGEN
+Maak per gemeente minimaal:
+- aantal woningen
+- aantal te koop
+- aantal verkocht
+- aantal v.o.v.
+- gemiddelde VON-prijs
+- mediaan VON-prijs
+- gemiddelde VON-prijs per m²
+- mediaan VON-prijs per m²
+- gemiddelde GBO
+- gemiddelde looptijd
+- aandeel woningen met parkeerplaats
+
+Dat ook uitgesplitst naar:
+- grondgebonden woningtypen
+- appartementcategorieën
+
+DATACONTROLE
+
+Controleer op:
+- dubbele Funda ID’s
+- dubbele URL’s
+- ontbrekende prijzen
+- ontbrekende GBO
+- ontbrekende energielabels
+- ontbrekende plaatsingsdata
+- onrealistische m²-prijzen
+- foutieve gemeentetoewijzingen
+
+Gebruik:
+- Outlier flag = JA/NEE
+- GemeenteOK = JA/NEE
+
+DUBBELEN
+Verwijder alleen exacte dubbelen BINNEN dit nieuwe bestand.
+
+Gebruik hiervoor:
+1. Funda ID
+2. Funda URL
+
+Maak een tabblad:
+“Verwijderde dubbelen”
+
+Daarin:
+- verwijderd record
+- reden
+- behouden record
+
+BELANGRIJK
+- Gebruik uitsluitend nieuwbouwwoningen op Funda.
+- Gebruik de afgelopen 10 dagen als zoekperiode.
+- Vul ontbrekende gegevens met “Onbekend”.
+- Gebruik filters op alle tabellen.
+- Voeg bron-URL’s toe.
+- Gebruik duidelijke kolomnamen.
+- Gebruik formules waar mogelijk.
+- Zorg dat de Excel direct analyseerbaar is.
+
+Sla het bestand op als:
+Funda_Nieuwbouw_Afgelopen_10_Dagen_[datum].xlsx
