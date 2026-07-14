@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PAS Nieuwbouw Dashboard</title>
+  <style>
+    :root{--bg:#0f172a;--card:#1e293b;--accent:#38bdf8;--text:#e2e8f0;--muted:#94a3b8;--border:#334155;}
+    *{box-sizing:border-box;}
+    body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text);}
+    header{padding:24px 32px;border-bottom:1px solid var(--border);}
+    header h1{margin:0 0 4px;font-size:24px;}
+    header p{margin:0;color:var(--muted);font-size:14px;}
+    .container{padding:24px 32px;}
+    .cards{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:24px;}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px 20px;min-width:160px;flex:1;}
+    .card .label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+    .card .value{font-size:26px;font-weight:600;margin-top:4px;}
+    .filters{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:20px;}
+    .filters select,.filters input{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:14px;}
+    table{width:100%;border-collapse:collapse;background:var(--card);border-radius:8px;overflow:hidden;}
+    th,td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px;text-align:left;}
+    th{background:#111c33;position:sticky;top:0;}
+    tr:hover td{background:#233047;}
+    a{color:var(--accent);text-decoration:none;}
+    .meta{color:var(--muted);font-size:13px;margin-bottom:16px;}
+    footer{padding:16px 32px;color:var(--muted);font-size:12px;border-top:1px solid var(--border);margin-top:24px;}
+    </style>
+  </head>
+  <body>
+    <div id="app">Wordt geladen...</div>
+    <script>
+      var appHtml = '';
+      appHtml += '<header><h1>PAS Nieuwbouw Dashboard</h1><p id="subtitle">Wordt geladen...</p></header>';
+      appHtml += '<div class="container">';
+      appHtml += '<div class="cards" id="cards"></div>';
+      appHtml += '<div class="filters">';
+      appHtml += '<input type="text" id="zoek" placeholder="Zoek op project, adres of plaats">';
+      appHtml += '<select id="fProvincie"><option value="">Alle provincies</option></select>';
+      appHtml += '<select id="fGemeente"><option value="">Alle gemeenten</option></select>';
+      appHtml += '<select id="fStatus"><option value="">Alle statussen</option></select>';
+      appHtml += '<select id="fType"><option value="">Alle woningtypen</option></select>';
+      appHtml += '</div>';
+      appHtml += '<p class="meta" id="resultaat"></p>';
+      appHtml += '<table><thead><tr>';
+      appHtml += '<th>Project</th><th>Adres</th><th>Plaats</th><th>Gemeente</th><th>Status</th><th>Type</th><th>Vraagprijs</th><th>GBO (m2)</th><th>Prijs per m2</th><th>Energielabel</th>';
+      appHtml += '</tr></thead><tbody id="tbody"></tbody></table>';
+      appHtml += '</div>';
+      appHtml += '<footer>Data afkomstig uit data/data.json, automatisch bijgewerkt via GitHub Actions.</footer>';
+      document.getElementById('app').innerHTML = appHtml;
+
+      var ALL = [];
+
+      fetch('data/data.json').then(function(r){ return r.json(); }).then(init).catch(function(e){
+      document.getElementById('subtitle').textContent = 'Kon data/data.json niet laden: ' + e.message;
+      });
+
+      function init(data){
+        ALL = data.records || [];
+        var sub = data.generatedAt ? ('Laatste update: ' + new Date(data.generatedAt).toLocaleString('nl-NL')) : 'Nog geen data gegenereerd';
+        document.getElementById('subtitle').textContent = sub + ' - ' + ALL.length + ' woningen';
+        fillSelect('fProvincie', 'provincie');
+        fillSelect('fGemeente', 'gemeente');
+        fillSelect('fStatus', 'status');
+        fillSelect('fType', 'type');
+      renderCards(ALL);
+        render(ALL);
+        document.getElementById('zoek').addEventListener('input', applyFilters);
+        document.getElementById('fProvincie').addEventListener('change', applyFilters);
+        document.getElementById('fGemeente').addEventListener('change', applyFilters);
+        document.getElementById('fStatus').addEventListener('change', applyFilters);
+        document.getElementById('fType').addEventListener('change', applyFilters);
+      }
+
+      function fillSelect(id, key){
+        var sel = document.getElementById(id);
+        var values = Array.from(new Set(ALL.map(function(r){ return r[key]; }).filter(Boolean))).sort();
+        values.forEach(function(v){
+          var opt = document.createElement('option');
+          opt.value = v;
+          opt.textContent = v;
+          sel.appendChild(opt);
+        });
+      }
+
+      function applyFilters(){
+        var q = document.getElementById('zoek').value.toLowerCase();
+        var prov = document.getElementById('fProvincie').value;
+        var gem = document.getElementById('fGemeente').value;
+        var stat = document.getElementById('fStatus').value;
+        var typ = document.getElementById('fType').value;
+        var filtered = ALL.filter(function(r){
+          if (prov && r.provincie !== prov) return false;
+          if (gem && r.gemeente !== gem) return false;
+          if (stat && r.status !== stat) return false;
+          if (typ && r.type !== typ) return false;
+          if (q){
+            var hay = [r.project, r.adres, r.plaats, r.gemeente].join(' ').toLowerCase();
+            if (hay.indexOf(q) === -1) return false;
+          }
+          return true;
+        });
+        renderCards(filtered);
+        render(filtered);
+      }
+
+      function fmtEuro(v){
+        if (v === undefined || v === null || v === '') return '-';
+        var n = Number(v);
+        if (isNaN(n)) return String(v);
+        return '\u20AC ' + n.toLocaleString('nl-NL');
+      }
+
+      function renderCards(list){
+        var cards = document.getElementById('cards');
+        var count = list.length;
+        var prices = list.map(function(r){ return Number(r.vp); }).filter(function(n){ return !isNaN(n) && n > 0; });
+        var avg = prices.length ? Math.round(prices.reduce(function(a, b){ return a + b; }, 0) / prices.length) : 0;
+        var ppms = list.map(function(r){ return Number(r.ppm); }).filter(function(n){ return !isNaN(n) && n > 0; });
+        var avgPpm = ppms.length ? Math.round(ppms.reduce(function(a, b){ return a + b; }, 0) / ppms.length) : 0;
+        var teKoop = list.filter(function(r){ return r.status === 'Te koop'; }).length;
+        var html = '';
+        var items = [
+          ['Aantal woningen', count],
+          ['Gemiddelde vraagprijs', fmtEuro(avg)],
+          ['Gemiddelde prijs per m2', fmtEuro(avgPpm)],
+          ['Te koop', teKoop]
+          ];
+        items.forEach(function(it){
+          html += '<div class="card"><div class="label">' + it[0] + '</div><div class="value">' + it[1] + '</div></div>';
+        });
+        cards.innerHTML = html;
+      }
+
+      function render(list){
+        var tbody = document.getElementById('tbody');
+        document.getElementById('resultaat').textContent = list.length + ' woningen gevonden';
+        var html = '';
+        list.forEach(function(r){
+          var link = r.url ? ('<a href="' + r.url + '" target="_blank" rel="noopener">' + (r.project || '-') + '</a>') : (r.project || '-');
+          html += '<tr><td>' + link + '</td>' +
+            '<td>' + (r.adres || '-') + '</td>' +
+            '<td>' + (r.plaats || '-') + '</td>' +
+            '<td>' + (r.gemeente || '-') + '</td>' +
+            '<td>' + (r.status || '-') + '</td>' +
+            '<td>' + (r.type || '-') + '</td>' +
+            '<td>' + fmtEuro(r.vp) + '</td>' +
+            '<td>' + (r.gbo || '-') + '</td>' +
+            '<td>' + fmtEuro(r.ppm) + '</td>' +
+            '<td>' + (r.energie || '-') + '</td></tr>';
+        });
+        tbody.innerHTML = html;
+      }
+</script>
+  </body>
+</html>
